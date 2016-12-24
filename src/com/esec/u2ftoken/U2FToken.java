@@ -104,9 +104,12 @@ public class U2FToken extends Applet implements ExtendedLength {
 	
 	private static short registerResponseRemaining;
 	
-	public U2FToken() {
+	public U2FToken(byte[] parameters, short parametersOffset, byte parametersLength) {
+		if (parametersLength != 2) {
+            ISOException.throwIt(ISO7816.SW_WRONG_DATA);
+        }
 		counter = new byte[4];
-		
+		ATTESTATION_CERTIFICATE = new byte[Util.getShort(parameters, (short)(parametersOffset))];
 		mKeyHandleGenerator = new IndexKeyHandle();
 		
 		attestationSignature = Signature.getInstance(Signature.ALG_ECDSA_SHA_256, false);
@@ -119,7 +122,10 @@ public class U2FToken extends Applet implements ExtendedLength {
 	}
 	public static void install(byte[] bArray, short bOffset, byte bLength) {
 		// GP-compliant JavaCard applet registration
-		new U2FToken().register();
+        short offset = bOffset;
+        offset += (short)(bArray[offset] + 1); // instance
+        offset += (short)(bArray[offset] + 1); // privileges
+        new U2FToken(bArray, (short)(offset + 1), bArray[offset]).register(bArray, (short)(bOffset + 1), bArray[bOffset]);
 	}
 
 	public void process(APDU apdu) {
@@ -189,9 +195,10 @@ public class U2FToken extends Applet implements ExtendedLength {
 	private void setAttestationCert(APDU apdu, byte cla, byte p1, byte p2, short lc) {
 		short len = apdu.setIncomingAndReceive();
 		byte[] buffer = apdu.getBuffer();
-		ATTESTATION_CERTIFICATE = new byte[len];
-		short offset = Util.arrayCopy(buffer, ISO7816.OFFSET_EXT_CDATA, ATTESTATION_CERTIFICATE, (short) 0, len);
-		attestationCertificateSet = true;
+		int offset = Util.makeShort(p1, p2);
+		offset = Util.arrayCopy(buffer, ISO7816.OFFSET_CDATA, ATTESTATION_CERTIFICATE, (short) offset, len);
+		if(offset == ATTESTATION_CERTIFICATE.length)
+			attestationCertificateSet = true;
 	}
 	
 	private void setAttestationPrivateKey(APDU apdu, byte cla, byte p1, byte p2, short lc) {

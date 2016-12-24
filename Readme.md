@@ -7,4 +7,6 @@ This applet has been tested with [JC30M48](http://www.javacardos.com/store/java_
 You can view or build the code with [JCIDE](http://www.javacardos.com/tools?ws=github&prj=FidoU2F) a powerful Javacard Integrated Development Environment.A project file(FidoU2F.jcproj) has been created for the users of JCIDE.
 
 ##Applet Initialization
-See the apdu_cmd.txt for detail.
+Use `install_applet.sh`, which requires [gp.jar](https://github.com/martinpaljak/GlobalPlatformPro), openssl 1.x and [pyscard](http://pyscard.sourceforge.net/).
+
+

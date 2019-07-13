@@ -195,9 +195,9 @@ public class U2FToken extends Applet implements ExtendedLength {
 	private void setAttestationCert(APDU apdu, byte cla, byte p1, byte p2, short lc) {
 		short len = apdu.setIncomingAndReceive();
 		byte[] buffer = apdu.getBuffer();
-		int offset = Util.makeShort(p1, p2);
+		short offset = Util.makeShort(p1, p2);
 		offset = Util.arrayCopy(buffer, ISO7816.OFFSET_CDATA, ATTESTATION_CERTIFICATE, (short) offset, len);
-		if(offset == ATTESTATION_CERTIFICATE.length)
+		if(offset == (short) ATTESTATION_CERTIFICATE.length)
 			attestationCertificateSet = true;
 	}
 	

@@ -12,8 +12,8 @@ import javacard.security.PrivateKey;
 
 /** 
  * @author Yang Zhou 
- * @version ´´½¨Ê±¼ä£º2015-12-10 ÉÏÎç10:00:46 
- * secp256r1µÄ²ÎÊı³õÊ¼»¯·â×°Àà£¬²ÎÊıÀ´×ÔbouncycastleµÄjavaÊµÏÖ
+ * @version åˆ›å»ºæ—¶é—´ï¼š2015-12-10 ä¸Šåˆ10:00:46 
+ * secp256r1çš„å‚æ•°åˆå§‹åŒ–å°è£…ç±»ï¼Œå‚æ•°æ¥è‡ªbouncycastleçš„javaå®ç°
  */
 public class SecP256r1 {
 	

@@ -7,7 +7,7 @@ import javacard.security.PrivateKey;
 
 /** 
  * @author Yang Zhou 
- * @version ´´½¨Ê±¼ä£º2015-12-23 ÏÂÎç07:55:49 
+ * @version åˆ›å»ºæ—¶é—´ï¼š2015-12-23 ä¸‹åˆ07:55:49 
  * Store user's ECC private key, initially can store 30 keys.
  */
 public class SecretKeyDataBase {

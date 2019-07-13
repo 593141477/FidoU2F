@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="applet" name="FidoU2F">
+  <target name="applet">
+    <get src="https://github.com/martinpaljak/ant-javacard/releases/download/v1.4/ant-javacard.jar" skipexisting="true" dest="."/>
+    <taskdef name="javacard" classname="pro.javacard.ant.JavaCard" classpath="ant-javacard.jar"/>
+    <javacard>
+      <cap output="FidoU2F.cap" sources="src" aid="a0:00:00:06:47:2f:00" version="1.1">
+        <applet class="com.esec.u2ftoken.U2FToken" aid="a0:00:00:06:47:2f:00:01"/>
+      </cap>
+    </javacard>
+  </target>
+</project>

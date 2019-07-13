@@ -22,17 +22,14 @@ else
 
     # openssl ec -in "$keyname".pem -pubout -out "$keyname".pub.pem
     # ./signcert "$CAkeyname".pem "$keyname".pub.pem "$keyname".der
+    rm "$keyname".csr
 fi
 
-eval $(stat -s "$keyname".der)
-size=$(printf '%04x' "$st_size")
-priv=$(openssl ec -in "$keyname".pem -text | grep -A 3 'priv:'|tail -n 3|tr -d -C '[:alnum:]'|sed 's/..//')
-
-# java -jar gp.jar --delete A000000647004F97A2E95001
-# java -jar gp.jar --install ledger-u2f.cap --params "01$size$priv"
+size=$(wc "$keyname".der |awk '{printf("%04x\n",$3)}')
+priv=$(openssl ec -in "$keyname".pem -text | grep -A 3 'priv:'|tail -n 3|tr -d -C '[:alnum:]')
 
 java -jar gp.jar --delete A0000006472F00
-java -jar gp.jar --install u2ftoken.cap --params "$size" &&
+java -jar gp.jar --install FidoU2F.cap --params "$size" &&
 python load_cert.py "$keyname".der &&
 java -jar gp.jar -a 00a4040008A0000006472F0001 -a "8002000020$priv" &&
-rm "$keyname".der "$keyname".pem
+rm -Ir "$keyname".der "$keyname".pem

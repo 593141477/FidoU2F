@@ -172,6 +172,10 @@ public class U2FToken extends Applet implements ExtendedLength {
 			case (byte) INS_ISO_GET_DATA:
 				getData(apdu, cla, p1, p2, lc);
 				break;
+
+			case (byte) INS_U2F_VERSION:
+				getSelectResponse(apdu);
+				break;
 				
 			default:
 				// good practice: If you don't know the INStruction, say so:

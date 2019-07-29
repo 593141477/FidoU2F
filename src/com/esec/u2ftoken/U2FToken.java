@@ -174,6 +174,8 @@ public class U2FToken extends Applet implements ExtendedLength {
 				break;
 
 			case (byte) INS_U2F_VERSION:
+				if(lc != 0)
+					ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 				getSelectResponse(apdu);
 				break;
 				

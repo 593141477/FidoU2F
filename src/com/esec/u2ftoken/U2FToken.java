@@ -140,7 +140,6 @@ public class U2FToken extends Applet implements ExtendedLength {
 		byte cla = buf[ISO7816.OFFSET_CLA];
 		byte p1 = buf[ISO7816.OFFSET_P1];
 		byte p2 = buf[ISO7816.OFFSET_P2];
-		short lc = (short)(buf[ISO7816.OFFSET_LC] & 0x00FF);
 		
 		if (cla == CLA_PROPRIETARY) {
 			if (attestationCertificateSet && attestationPrivateKeySet) {
@@ -148,10 +147,10 @@ public class U2FToken extends Applet implements ExtendedLength {
 			}
 			switch (buf[ISO7816.OFFSET_INS]) {
 			case INS_SET_ATTESTATION_CERT:
-				setAttestationCert(apdu, cla, p1, p2, lc);
+				setAttestationCert(apdu, cla, p1, p2);
 				break;
 			case INS_SET_ATTESTATION_PRIVATE_KEY:
-				setAttestationPrivateKey(apdu, cla, p1, p2, lc);
+				setAttestationPrivateKey(apdu, cla, p1, p2);
 				break;
 			default:
 				ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
@@ -162,19 +161,20 @@ public class U2FToken extends Applet implements ExtendedLength {
 			}
 			switch (buf[ISO7816.OFFSET_INS]) {
 			case (byte) INS_U2F_REGISTER: // U2F register command
-				u2fRegister(apdu, cla, p1, p2, lc);
+				u2fRegister(apdu, cla, p1, p2);
 				break;
 				
 			case (byte) INS_U2F_AUTHENTICATE: // U2F authenticate command
-				u2fAuthenticate(apdu, cla, p1, p2, lc);
+				u2fAuthenticate(apdu, cla, p1, p2);
 				break;
 			
 			case (byte) INS_ISO_GET_DATA:
-				getData(apdu, cla, p1, p2, lc);
+				getData(apdu, cla, p1, p2);
 				break;
 
 			case (byte) INS_U2F_VERSION:
-				if(lc != 0)
+				apdu.setIncomingAndReceive();
+				if(apdu.getIncomingLength() != 0)
 					ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 				getSelectResponse(apdu);
 				break;
@@ -198,7 +198,7 @@ public class U2FToken extends Applet implements ExtendedLength {
 		apdu.setOutgoingAndSend((short)0, (short)VERSION.length);
 	}
 	
-	private void setAttestationCert(APDU apdu, byte cla, byte p1, byte p2, short lc) {
+	private void setAttestationCert(APDU apdu, byte cla, byte p1, byte p2) {
 		short len = apdu.setIncomingAndReceive();
 		byte[] buffer = apdu.getBuffer();
 		short offset = Util.makeShort(p1, p2);
@@ -207,7 +207,7 @@ public class U2FToken extends Applet implements ExtendedLength {
 			attestationCertificateSet = true;
 	}
 	
-	private void setAttestationPrivateKey(APDU apdu, byte cla, byte p1, byte p2, short lc) {
+	private void setAttestationPrivateKey(APDU apdu, byte cla, byte p1, byte p2) {
 		short len = apdu.setIncomingAndReceive();
 		byte[] buffer = apdu.getBuffer();
 		attestationPrivateKey = (ECPrivateKey)KeyBuilder.buildKey(KeyBuilder.TYPE_EC_FP_PRIVATE, KeyBuilder.LENGTH_EC_FP_256, false);
@@ -223,9 +223,8 @@ public class U2FToken extends Applet implements ExtendedLength {
 	 * @param cla 0x00
 	 * @param p1 
 	 * @param p2
-	 * @param lc
 	 */
-	private void u2fRegister(APDU apdu, byte cla, byte p1, byte p2, short lc) {
+	private void u2fRegister(APDU apdu, byte cla, byte p1, byte p2) {
 		short readCount = apdu.setIncomingAndReceive();
 		short dataOffset = apdu.getOffsetCdata();
 		boolean extendedLength = (dataOffset != ISO7816.OFFSET_CDATA);
@@ -287,9 +286,8 @@ public class U2FToken extends Applet implements ExtendedLength {
 		}
 	}
 	
-	private void getData(APDU apdu, byte cla, byte p1, byte p2, short lc) {
+	private void getData(APDU apdu, byte cla, byte p1, byte p2) {
 		byte[] buffer = apdu.getBuffer();
-		short length = lc;
 		short blockSize = apdu.setOutgoing();
 		
 		if (registerResponseRemaining > blockSize) { // there's still more than Le bytes to be read
@@ -311,7 +309,7 @@ public class U2FToken extends Applet implements ExtendedLength {
 		}
 	}
 	
-	private void u2fAuthenticate(APDU apdu, byte cla, byte p1, byte p2, short lc) {
+	private void u2fAuthenticate(APDU apdu, byte cla, byte p1, byte p2) {
 		if (counterOverflowed) {
 			ISOException.throwIt(ISO7816.SW_FILE_FULL);
 		}

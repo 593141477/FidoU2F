@@ -39,6 +39,11 @@ public class U2FToken extends Applet implements ExtendedLength {
 	private static final byte P1_CONTROL_SIGN = 0x03;
 	
 	/**
+	 * 0x08. Check the key handle's validation and sign without validating user presence.
+	 */
+	private static final byte P1_CONTROL_SIGN_WITHOUT_USER = 0x08;
+	
+	/**
 	 * 64 bytes, contains 32 bytes application sha256 and 32 bytes challenge sha256(this is a hash of Client Data)
 	 */
 	private static final short LEN_REGISTRATION_REQUEST_MESSAGE = 64;
@@ -59,7 +64,12 @@ public class U2FToken extends Applet implements ExtendedLength {
 	private static final byte CLA_U2F = 0x00;
 	
 	/**
-	 * 0xf0
+	 * 0x90
+	 */
+	private static final byte CLA_U2F_USER_NOT_PRESENCE = (byte)0x90;
+	
+	/**
+	 * 0x80
 	 */
 	private static final byte CLA_PROPRIETARY = (byte)0x80;
 	
@@ -155,7 +165,7 @@ public class U2FToken extends Applet implements ExtendedLength {
 			default:
 				ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
 			}
-		} else if (cla == CLA_U2F) {
+		} else if (cla == CLA_U2F || cla == CLA_U2F_USER_NOT_PRESENCE) {
 			if (!attestationCertificateSet || !attestationPrivateKeySet) {
 				ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
 			}
@@ -230,6 +240,9 @@ public class U2FToken extends Applet implements ExtendedLength {
 		boolean extendedLength = (dataOffset != ISO7816.OFFSET_CDATA);
 		if (readCount != LEN_REGISTRATION_REQUEST_MESSAGE) {
 			ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+		}
+		if (cla == CLA_U2F_USER_NOT_PRESENCE) {
+			ISOException.throwIt(U2F_SW_TEST_OF_PRESENCE_REQUIRED);
 		}
 		
 		byte[] buffer = apdu.getBuffer();
@@ -325,6 +338,7 @@ public class U2FToken extends Applet implements ExtendedLength {
 		case (byte) P1_CONTROL_CHECK_ONLY:
 			break;
 		case (byte) P1_CONTROL_SIGN:
+		case (byte) P1_CONTROL_SIGN_WITHOUT_USER:
 			sign = true;
 			break;
 		default:
@@ -347,6 +361,10 @@ public class U2FToken extends Applet implements ExtendedLength {
 			ISOException.throwIt(U2F_SW_INVALID_KEY_HANDLE);
 		}
 		if (!sign) {
+			ISOException.throwIt(U2F_SW_TEST_OF_PRESENCE_REQUIRED);
+		}
+		// test user presence before signing
+		if (p1 != P1_CONTROL_SIGN_WITHOUT_USER && cla == CLA_U2F_USER_NOT_PRESENCE) {
 			ISOException.throwIt(U2F_SW_TEST_OF_PRESENCE_REQUIRED);
 		}
 		

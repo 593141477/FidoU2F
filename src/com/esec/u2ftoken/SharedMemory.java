@@ -22,7 +22,7 @@ public class SharedMemory {
 	
 	public byte[] m65BytesUserPublicKey;
 	
-	public byte[] m33BytesKeyHandle;
+	public byte[] m64BytesKeyHandle;
 	
 	public byte[] m80BytesSignature;
 	
@@ -40,7 +40,7 @@ public class SharedMemory {
 		m32BytesChallengeSha256 = JCSystem.makeTransientByteArray((short) 32, JCSystem.CLEAR_ON_DESELECT);
 		m32BytesUserPrivateKey = JCSystem.makeTransientByteArray((short) 32, JCSystem.CLEAR_ON_DESELECT);
 		m65BytesUserPublicKey = JCSystem.makeTransientByteArray((short) 65, JCSystem.CLEAR_ON_DESELECT);
-		m33BytesKeyHandle = JCSystem.makeTransientByteArray((short) 33, JCSystem.CLEAR_ON_DESELECT);
+		m64BytesKeyHandle = JCSystem.makeTransientByteArray((short) 64, JCSystem.CLEAR_ON_DESELECT);
 		m80BytesSignature = JCSystem.makeTransientByteArray((short) 80, JCSystem.CLEAR_ON_DESELECT);
 		m69BytesAuthenticationSignedData = JCSystem.makeTransientByteArray((short) 69, JCSystem.CLEAR_ON_DESELECT);
 	}

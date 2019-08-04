@@ -120,7 +120,7 @@ public class U2FToken extends Applet implements ExtendedLength {
         }
 		counter = new byte[4];
 		ATTESTATION_CERTIFICATE = new byte[Util.getShort(parameters, (short)(parametersOffset))];
-		mKeyHandleGenerator = new IndexKeyHandle();
+		mKeyHandleGenerator = new CipherKeyHandle();
 		
 		attestationSignature = Signature.getInstance(Signature.ALG_ECDSA_SHA_256, false);
 		authenticateSignature = Signature.getInstance(Signature.ALG_ECDSA_SHA_256, false);
@@ -354,7 +354,9 @@ public class U2FToken extends Applet implements ExtendedLength {
 		
 		// Verify Key Handle
 		short keyHandleLen = (short) (buffer[(short)(dataOffset + 64)] & 0x00ff);
-		byte[] keyHandle = JCSystem.makeTransientByteArray(keyHandleLen, JCSystem.CLEAR_ON_DESELECT);
+		if(keyHandleLen != (short)64)
+			ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+		byte[] keyHandle = SharedMemory.getInstance().m64BytesKeyHandle;
 		Util.arrayCopyNonAtomic(buffer, (short) (dataOffset + 64 + 1), keyHandle, (short) 0, keyHandleLen);
 		ECPrivateKey privKey = mKeyHandleGenerator.verifyKeyHandle(keyHandle, applicationSha256);
 		if (privKey == null) {

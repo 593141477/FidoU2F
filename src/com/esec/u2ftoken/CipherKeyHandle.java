@@ -34,7 +34,11 @@ public class CipherKeyHandle implements KeyHandleGenerator {
 			privateKey.getS(mPrivKeyAndSha, off);
 		}
 		Util.arrayCopyNonAtomic(applicationSha256, (short) 0, mPrivKeyAndSha, (short) 32, (short) 32);
-		// return mPrivKeyAndSha; /// For DEBUG only
+		// applicationSha256 ^= privateKey, to verify key integrity
+		for(short i = (short)0, j = (short)32; i < (short)32; i++, j++)
+			mPrivKeyAndSha[j] ^= mPrivKeyAndSha[i];
+
+		// return mPrivKeyAndSha; /// No encryption, for DEBUG only
 
 		byte[] keyHandle = SharedMemory.getInstance().m64BytesKeyHandle;
 		mCipher.keyWrap(mPrivKeyAndSha, (short) 0, (short) mPrivKeyAndSha.length, keyHandle, (short) 0, Cipher.MODE_ENCRYPT);
@@ -45,9 +49,12 @@ public class CipherKeyHandle implements KeyHandleGenerator {
 	 * Check the application parameter and the index.
 	 */
 	public ECPrivateKey verifyKeyHandle(byte[] keyHandle, byte[] applicationSha256) {
-		// byte[] mPrivKeyAndSha = keyHandle; /// For DEBUG only
+		// byte[] mPrivKeyAndSha = keyHandle; /// No encryption, for DEBUG only
 		mCipher.keyWrap(keyHandle, (short) 0, (short) keyHandle.length, mPrivKeyAndSha, (short) 0, Cipher.MODE_DECRYPT);
 
+		// applicationSha256 ^= privateKey, to verify key integrity
+		for(short i = (short)0, j = (short)32; i < (short)32; i++, j++)
+			mPrivKeyAndSha[j] ^= mPrivKeyAndSha[i];
 		// Check the application parameter
 		if (Util.arrayCompare(mPrivKeyAndSha, (short) 32, applicationSha256, (short) 0, (short) 32) != (byte)0x00) {
 			return null;
